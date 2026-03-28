@@ -1,57 +1,93 @@
 # CodeAlpha_CreditScoring
-📌 Overview
-This project is a Machine Learning-based Credit Scoring Model developed as part of an internship task.
-The model predicts whether a person is creditworthy or not using classification techniques.
-🎯 Objective
-To build a predictive model that can classify customers into:
-✅ Creditworthy (Safe)
-❌ Not Creditworthy (Risky)
-🛠️ Technologies Used
-Python 🐍
-Pandas
-Matplotlib
-Scikit-learn
-📊 Dataset
-Dataset used: Titanic Dataset (for learning and simulation)
-Features include:
-Age
-Gender
-Fare
-Passenger Class
-Family details
-⚙️ Project Workflow
-Data Loading
-Data Cleaning (handling missing values)
-Feature Encoding
-Data Visualization
-Train-Test Split
-Model Training (Random Forest)
-Model Evaluation
-Feature Importance Analysis
-🤖 Model Used
-Random Forest Classifier
-📈 Results
-✅ Accuracy: ~81%
-Evaluated using:
-Precision
-Recall
-F1-score
-📊 Visualizations
-Survival Count Graph
-Feature Importance Graph
-💡 Key Insights
-Certain features like Fare and Passenger Class significantly impact predictions
-Model performs better in predicting non-risky cases compared to risky ones
-🚀 Future Improvements
-Hyperparameter tuning
-Use real financial datasets
-Improve recall for minority class
-Deploy as a web application
-📎 How to Run
-Open Google Colab or Jupyter Notebook
-Run all cells sequentially
-View output and graphs
-🙌 Conclusion
-This project demonstrates the practical implementation of a classification model and provides insights into real-world credit risk prediction systems.
-🔗 Author
-Akash Rai
+# ==============================
+# CREDIT SCORING MODEL PROJECT
+# ==============================
+
+# Import libraries
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report
+
+# ------------------------------
+# Step 1: Load Dataset
+# ------------------------------
+url = "https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv"
+df = pd.read_csv(url)
+
+# ------------------------------
+# Step 2: Data Cleaning
+# ------------------------------
+df = df.drop(["Name", "Ticket", "Cabin"], axis=1)
+
+df["Age"] = df["Age"].fillna(df["Age"].mean())
+df["Embarked"] = df["Embarked"].fillna(df["Embarked"].mode()[0])
+
+# ------------------------------
+# Step 3: Encoding
+# ------------------------------
+df["Sex"] = df["Sex"].map({"male": 0, "female": 1})
+df = pd.get_dummies(df, columns=["Embarked"], drop_first=True)
+
+# ------------------------------
+# Step 4: Basic Info
+# ------------------------------
+print("Dataset Info:\n")
+print(df.info())
+
+print("\nStatistical Summary:\n")
+print(df.describe())
+
+# ------------------------------
+# Step 5: Visualization
+# ------------------------------
+df["Survived"].value_counts().plot(kind="bar")
+plt.title("Survival Count")
+plt.xlabel("0 = Not Survived, 1 = Survived")
+plt.ylabel("Count")
+plt.show()
+
+# ------------------------------
+# Step 6: Features & Target
+# ------------------------------
+X = df.drop("Survived", axis=1)
+y = df["Survived"]
+
+# ------------------------------
+# Step 7: Train-Test Split (FIXED)
+# ------------------------------
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# ------------------------------
+# Step 8: Model Training (FIXED)
+# ------------------------------
+model = RandomForestClassifier(random_state=42)
+model.fit(X_train, y_train)
+
+# ------------------------------
+# Step 9: Prediction & Evaluation
+# ------------------------------
+y_pred = model.predict(X_test)
+
+print("\nModel Performance:\n")
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print(classification_report(y_test, y_pred))
+
+# ------------------------------
+# Step 10: Feature Importance
+# ------------------------------
+importances = model.feature_importances_
+features = X.columns
+
+importance_df = pd.DataFrame({
+    "Feature": features,
+    "Importance": importances
+}).sort_values(by="Importance", ascending=False)
+
+importance_df.plot(kind="bar", x="Feature", y="Importance")
+plt.title("Feature Importance")
+plt.xticks(rotation=45)
+plt.show()
